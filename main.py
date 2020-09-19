@@ -23,7 +23,7 @@ rugby = json.load(rugby_file)
 team_name = []
 for team in rugby.get("teams"):
     team_name.append(team.get('name'))
-score_pattern = re.compile(r'(\s\d{1,3}[\-]\d{1,3}\s)')
+score_pattern = re.compile(r'(\s\d{1,3}[\-]\d{1,3})')
 # ================ Task 3 setup ================ #
 task3 = open("task3.csv", 'w', newline='')
 task3_writer = csv.writer(task3)
@@ -123,13 +123,13 @@ while to_visit:
 
     pages_visited = pages_visited + 1
 
-#game_difference_list = []
+# calculate average game score difference
 for team in game_difference:
     avg_dif = game_difference[team][0] / game_difference[team][1]
     task3_writer.writerow([team, avg_dif])
     game_difference[team] = avg_dif
 
-
+# Task 4 plot
 mention_freq_series = pd.Series(mention_freq)
 frequency_data = pd.DataFrame({'frequency': mention_freq_series})
 frequency_data = frequency_data.sort_values(by='frequency', ascending=False).head(5)
@@ -140,10 +140,9 @@ plt.ylabel('Mentioned frequency')
 plt.title("Task 4")
 plt.savefig("task4.png", bbox_inches='tight')
 plt.clf()
-
+# Task 5 plot
 game_difference_series = pd.Series(game_difference)
 frequency_score_data = pd.DataFrame({'frequency':mention_freq_series , 'score difference':game_difference_series})
-print(frequency_score_data)
 plt.scatter(frequency_score_data['frequency'], frequency_score_data['score difference'])
 plt.xlabel('Mentioned frequency')
 plt.ylabel('fame_difference')
@@ -151,4 +150,3 @@ plt.title("Task 5")
 plt.savefig("task5.png", bbox_inches='tight')
 
 print('\nvisited {0:5d} pages; {1:5d} pages in to_visit'.format(len(visited), len(to_visit)))
-# print('{0:1d}'.format(pages_visited))
