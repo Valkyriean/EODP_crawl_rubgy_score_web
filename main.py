@@ -26,7 +26,8 @@ score_pattern = re.compile(r'(\s\d{1,3}[\-]\d{1,3}\s)')
 # ================ Task 3 setup ================ #
 task3 = open("task3.csv", 'w', newline='')
 task3_writer = csv.writer(task3)
-task3_writer.writerow(["url", "headline", "team", "score"])
+task3_writer.writerow(["team", "avg game difference"])
+game_difference = {}
 # ================ Task 4 setup ================ #
 
 
@@ -74,30 +75,40 @@ while (to_visit):
     task1_writer.writerow([link, headline])
     # ================ Task 2 scarping ================ #
     text = headline
+    # convert webpage into a string
     text_list = soup.findAll('p')
     for paragraph in text_list:
         text = text + " " + paragraph.text
-
+    # find the first appeared team name
     last_team_index = -1
     first_mentioned_team = ''
-
     for team in team_name:
         index = text.find(team)
         if index != -1 and (index < last_team_index or last_team_index == -1):
             first_mentioned_team = team
             last_team_index = index
-
+    # find all scores
     result = score_pattern.findall(text)
+    # find the best score for team 1
     best_team1_score = -1
-
     for score in result:
         cur_team1_score = int(score[1:score.find('-')])
         if cur_team1_score > best_team1_score:
             best_team1_score = cur_team1_score
     print(best_team1_score)
-
+    # if a team is mentioned and scored
     if first_mentioned_team != '' and best_team1_score != -1:
         task2_writer.writerow([link, headline, first_mentioned_team, best_team1_score])
+    # ================ Task 3 scarping ================ #
+    if first_mentioned_team != '' and len(result) > 0:
+        if first_mentioned_team not in game_difference:
+            game_difference[first_mentioned_team] = [0, 0]
+        for score in result:
+            t1 = int(score[1:score.find('-')])
+            t2 = int(score[score.find('-') + 1:-1])
+            game_difference[first_mentioned_team][0] += abs(t1 - t2)
+            game_difference[first_mentioned_team][1] += 1
+
 
     # mark the item as visited, i.e., add to visited list, remove from to_visit
     visited[link] = True
@@ -110,6 +121,10 @@ while (to_visit):
             to_visit.append(new_url)
 
     pages_visited = pages_visited + 1
+
+for team in game_difference:
+    avg_dif = game_difference[team][0] / game_difference[team][1]
+    task3_writer.writerow([team, avg_dif])
 
 print('\nvisited {0:5d} pages; {1:5d} pages in to_visit'.format(len(visited), len(to_visit)))
 # print('{0:1d}'.format(pages_visited))
