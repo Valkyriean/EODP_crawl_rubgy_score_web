@@ -15,6 +15,10 @@ task1_writer = csv.writer(task1)
 task1_writer.writerow(["url", "headline"])
 
 # ================ Task 2 setup ================ #
+# max rugby score is 356
+highest_possible_rugby_score = 356
+# impossible score under rugby rule, see report for prove
+impossible_score = [1,2,4]
 task2 = open("task2.csv", 'w', newline='')
 task2_writer = csv.writer(task2)
 task2_writer.writerow(["url", "headline", "team", "score"])
@@ -83,19 +87,29 @@ while to_visit:
             last_team_index = index
     # save all scores appeared in webpage
     results = score_pattern.findall(article)
+    # check the validity of the score
+    scores = []
+    for score in results:
+        score = re.sub('\s', '', score)
+        t1 = int(score[0:score.find('-')])
+        t2 = int(score[score.find('-') + 1:len(score)])
+        # Check if the score is valid
+        if t1 <= highest_possible_rugby_score and t2 <= highest_possible_rugby_score and t1 not in impossible_score \
+                and t2 not in impossible_score:
+            scores.append([t1, t2])
+
     # find the best score for team 1
     largest_match_score = ""
     largest_sum = -1
     difference = -1
     # if the page is considered valid with team name and score
-    if first_mentioned_team != '' and len(results) > 0:
+    if first_mentioned_team != '' and len(scores) > 0:
         # increase the mention frequency counter by one
         mention_freq[first_mentioned_team] = mention_freq[first_mentioned_team] + 1
-        for score in results:
-            score = re.sub('\s', '', score)
+        for score in scores:
             # extract two scores
-            t1 = int(score[0:score.find('-')])
-            t2 = int(score[score.find('-') + 1:len(score)])
+            t1 = score[0]
+            t2 = score[1]
             # task 2
             if t1 + t2 > largest_sum:
                 largest_match_score = score
@@ -106,7 +120,8 @@ while to_visit:
             game_difference[first_mentioned_team] = [0, 0]
         game_difference[first_mentioned_team][0] += difference
         game_difference[first_mentioned_team][1] += 1
-        task2_writer.writerow([link, headline, first_mentioned_team, largest_match_score])
+        task2_writer.writerow([link, headline, first_mentioned_team, str(largest_match_score[0]) + "-" +
+                               str(largest_match_score[1])])
 
     # mark the item as visited, i.e., add to visited list, remove from to_visit
     visited[link] = True
@@ -131,17 +146,17 @@ frequency_data = pd.DataFrame({'frequency': mention_freq_series})
 frequency_data = frequency_data.sort_values(by='frequency', ascending=False).head(5)
 plt.xticks(rotation='vertical')
 plt.bar(frequency_data.index, frequency_data['frequency'])
-plt.xlabel('Team name')
-plt.ylabel('Mentioned frequency')
+plt.xlabel('Team_name')
+plt.ylabel('Mentioned_frequency')
 plt.title("Task 4")
 plt.savefig("task4.png", bbox_inches='tight')
 plt.clf()
 # Task 5 plot
 game_difference_series = pd.Series(game_difference)
-frequency_score_data = pd.DataFrame({'frequency':mention_freq_series , 'score difference':game_difference_series})
-plt.scatter(frequency_score_data['frequency'], frequency_score_data['score difference'])
-plt.xlabel('Mentioned frequency')
-plt.ylabel('fame_difference')
+frequency_score_data = pd.DataFrame({'Mentioned_frequency': mention_freq_series, 'Average_score_difference': game_difference_series})
+plt.scatter(frequency_score_data['Mentioned_frequency'], frequency_score_data['Average_score_difference'])
+plt.xlabel('Mentioned_frequency')
+plt.ylabel('Average_score_difference')
 plt.title("Task 5")
 plt.savefig("task5.png", bbox_inches='tight')
 
