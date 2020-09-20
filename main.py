@@ -49,7 +49,6 @@ print(seed_url)
 # Remove index.html
 links = soup.findAll('a')
 seed_link = soup.findAll('a', href=re.compile("^index.html"))
-# to_visit_relative = list(set(links) - set(seed_link))
 to_visit_relative = [l for l in links if l not in seed_link]
 
 # Resolve to absolute urls
@@ -61,13 +60,10 @@ for link in to_visit_relative:
 while to_visit:
     # consume the list of urls
     link = to_visit.pop(0)
-
     # need to concat with base_url, an example item <a href="catalogue/sharp-objects_997/index.html">
     page = requests.get(link)
-
     # scarping start from here
     soup = BeautifulSoup(page.text, 'html.parser')
-
     # ================ Task 1 scarping ================ #
     headline = soup.find("h1", class_="headline").text
     task1_writer.writerow([link, headline])
