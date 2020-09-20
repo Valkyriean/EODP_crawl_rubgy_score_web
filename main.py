@@ -28,11 +28,13 @@ team_name = []
 for team in rugby.get("teams"):
     team_name.append(team.get('name'))
 score_pattern = re.compile(r'(\s\d{1,3}[\-]\d{1,3})')
+
 # ================ Task 3 setup ================ #
 task3 = open("task3.csv", 'w', newline='')
 task3_writer = csv.writer(task3)
 task3_writer.writerow(["team", "avg_game_difference"])
 game_difference = {}
+
 # ================ Task 4 setup ================ #
 mention_freq = {}
 for name in team_name:
@@ -151,6 +153,7 @@ plt.ylabel('Mentioned_frequency')
 plt.title("Task 4")
 plt.savefig("task4.png", bbox_inches='tight')
 plt.clf()
+
 # Task 5 plot
 game_difference_series = pd.Series(game_difference)
 frequency_score_data = pd.DataFrame({'Mentioned_frequency': mention_freq_series, 'Average_score_difference': game_difference_series})
